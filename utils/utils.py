@@ -1,5 +1,6 @@
 import logging
 import re
+import os
 from functools import wraps
 from html import escape as html_escape
 
@@ -22,23 +23,29 @@ def check_permissions(required_permission='admin'):
         @wraps(func)
         def wrapped(update: Update, context: CallbackContext, *args, **kwargs):
             user_id = update.effective_user.id
-            
-            if user_id in config.telegram.admins:
+
+            # Retrieve admins list from environment variables or config file
+            admins_list = os.environ.get(
+                'ADMINS', config.telegram.admins)
+
+            if user_id in admins_list:
                 # always give the green light for admins
                 return func(update, context, *args, **kwargs)
 
             if required_permission in ('a', 'admin') or permissions['admins_only']:
                 # if admins_only: no one can use the bot but the admins
-                logger.info('unauthorized use by %d (%s)', user_id, update.effective_user.first_name)
-                
+                logger.info('unauthorized use by %d (%s)', user_id,
+                            update.effective_user.first_name)
+
                 text = "You are not allowed to use this function"
                 if update.callback_query:
-                    update.callback_query.answer(text, show_alert=True, cache_time=60)
+                    update.callback_query.answer(
+                        text, show_alert=True, cache_time=60)
                 elif update.message:
                     update.message.reply_text(text)
-                
+
                 return
-            
+
             # check if the config allows one of the operations for non-admin users
             if required_permission in ('r', 'read') and permissions['read']:
                 return func(update, context, *args, **kwargs)
@@ -47,15 +54,18 @@ def check_permissions(required_permission='admin'):
                 return func(update, context, *args, **kwargs)
             elif required_permission in ('e', 'edit') and (permissions['read'] and permissions['edit']):
                 return func(update, context, *args, **kwargs)
-            
+
             # all the permissions are disabled: unauthorized access
-            logger.info('unauthorized command usage (%s) by %d (%s)', required_permission, user_id, update.effective_user.first_name)
+            logger.info('unauthorized command usage (%s) by %d (%s)',
+                        required_permission, user_id, update.effective_user.first_name)
             if update.callback_query:
                 text = f'"{required_permission}" permission disabled for non-admin users'
-                update.callback_query.answer(text, show_alert=True, cache_time=30)
+                update.callback_query.answer(
+                    text, show_alert=True, cache_time=30)
             elif update.message:
-                update.message.reply_html(f'<code>[{required_permission}]</code> permission disabled for non-admin users')
-            
+                update.message.reply_html(
+                    f'<code>[{required_permission}]</code> permission disabled for non-admin users')
+
             return
 
         return wrapped
@@ -69,7 +79,8 @@ def failwithmessage(func):
             return func(update, context, *args, **kwargs)
         except Exception as e:
             error_str = str(e)
-            logger.info('error while running handler callback: %s', error_str, exc_info=True)
+            logger.info('error while running handler callback: %s',
+                        error_str, exc_info=True)
             text = 'An error occurred while processing the {} (<code>{}()</code>): <code>{}</code>'.format(
                 'callback query' if update.callback_query else 'message',
                 func.__name__,
@@ -161,7 +172,8 @@ def send_admin(bot, text):
 
 
 def hash_from_magnet(magnet_link: str):
-    torrent_hash = re.search(r'magnet:\?xt=urn:btih:([a-z0-9]+)(?:&.*)?', magnet_link, re.I).group(1)
+    torrent_hash = re.search(
+        r'magnet:\?xt=urn:btih:([a-z0-9]+)(?:&.*)?', magnet_link, re.I).group(1)
 
     return torrent_hash
 

@@ -26,7 +26,7 @@ added_torrents_category = "" # the category to set for torrents added through th
 altspeed_presets = [
     # alternative speed buttons (in kb/s) to show when /overview is used. Set this to [] (empty list) to show no altspeed button
     # [upload, download],
-    [5, 10],
-    [5, 50],
-    [5, 200],
+    [50, 250],
+    [100, 800],
+    [500, 2500],
 ]

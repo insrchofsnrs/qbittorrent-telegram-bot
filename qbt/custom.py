@@ -1,6 +1,7 @@
 import datetime
 import logging
 import math
+import os
 from typing import Optional, List
 
 # noinspection PyPackageRequirements
@@ -370,5 +371,6 @@ class OfflineClient:
 
         return internal()
 
+    qbittorrent_url = os.environ.get('TORRENT_URL', config.qbittorrent.url)
     def _raise(self):
-        raise ConnectionError('cannot connect to qbittorrent ({})'.format(config.qbittorrent.url))
+        raise ConnectionError('cannot connect to qbittorrent ({})'.format(qbittorrent_url))
