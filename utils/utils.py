@@ -27,6 +27,7 @@ def check_permissions(required_permission='admin'):
             # Retrieve admins list from environment variables or config file
             admins_list = os.environ.get(
                 'ADMINS', config.telegram.admins)
+            logger.info("admins: " + admins_list)
 
             if str(user_id) in admins_list:
                 return func(update, context, *args, **kwargs)
