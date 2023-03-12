@@ -28,8 +28,7 @@ def check_permissions(required_permission='admin'):
             admins_list = os.environ.get(
                 'ADMINS', config.telegram.admins)
 
-            if user_id in admins_list:
-                # always give the green light for admins
+            if str(user_id) in admins_list:
                 return func(update, context, *args, **kwargs)
 
             if required_permission in ('a', 'admin') or permissions['admins_only']:
