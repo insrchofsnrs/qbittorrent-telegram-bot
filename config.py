@@ -9,7 +9,7 @@ class AttrDict(dict):
         self.__dict__ = self
 
 
-config = toml.load(AttrDict, 'config.toml')
+config = toml.load('config.toml', AttrDict)
 
 
 def exit_with_message(message: str):
